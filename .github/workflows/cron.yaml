@@ -41,7 +41,7 @@ jobs:
                   "storeWhiteList": [],
                   "pushConfigs": [
                     {
-                      "barkPushUrl": "https://api.day.app/push",
+                      "barkPushUrl": "https://bark.19510272.xyz/",
                       "barkPushToken": "${{ secrets.BARK_TOKEN }}",
                       "barkPushSound": "multiwayinvitation.caf",
                       "feishuBotWebhooks": "",
