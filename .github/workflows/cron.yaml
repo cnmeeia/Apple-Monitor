@@ -2,7 +2,7 @@ name: Monitor iPhone 17 Pro Inventory
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 * * * *'  # 每小时执行一次
 
 jobs:
   monitor:
@@ -11,18 +11,22 @@ jobs:
       ACTIONS_UPLOAD_DEPENDENCY_GRAPH: false  # 禁用依赖图上传
 
     steps:
+      # 1️⃣ 拉取仓库
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ 安装 JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
+      # 3️⃣ 构建 Maven 项目
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
+      # 4️⃣ 生成 config.json 并打印确认
       - name: Create config.json
         run: |
           cat > config.json << EOF
@@ -49,14 +53,22 @@ jobs:
             }
           }
           EOF
+          echo "===== config.json 内容如下（确认 token 是否正确） ====="
+          cat config.json
 
+      # 5️⃣ 移动 config.json 到 target 目录，确保 Java 程序能读取
+      - name: Move config.json
+        run: mv config.json target/
+
+      # 6️⃣ 运行 Java 程序
       - name: Run Apple Monitor
         run: |
-          JAR_FILE=$(ls target/*.jar | head -1)
+          cd target
+          JAR_FILE=$(ls *.jar | head -1)
           if [ -z "$JAR_FILE" ]; then
             echo "No JAR file found in target/. Build failed?"
             exit 1
           fi
           echo "Running $JAR_FILE..."
-          java -jar "$JAR_FILE"
+          java -jar "$JAR_FILE" --config config.json
         timeout-minutes: 10
