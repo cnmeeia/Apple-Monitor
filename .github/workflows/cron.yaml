@@ -2,11 +2,14 @@ name: Monitor iPhone 17 Pro Inventory
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Every hour
+    - cron: '0 * * * *'
 
 jobs:
   monitor:
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_UPLOAD_DEPENDENCY_GRAPH: false  # 禁用依赖图上传
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
