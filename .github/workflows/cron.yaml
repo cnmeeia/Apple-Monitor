@@ -2,7 +2,7 @@ name: Monitor iPhone 17 Pro Inventory
 
 on:
   schedule:
-    - cron: '0 * * * *'  # 每小时执行一次
+    - cron: '0 * * * *'  # Every hour
 
 jobs:
   monitor:
@@ -25,12 +25,12 @@ jobs:
           cat > config.json << EOF
           {
             "appleTaskConfig": {
-              "cronExpressions": "0/1 * * * * ?",
+              "cronExpressions": "0/5 * * * * ?",
               "country": "CN",
               "location": "湖南 长沙",
               "deviceCodeList": [
                 {
-                  "deviceCode": "MG8T4CH/A",
+                  "deviceCode": "MG8T3CH/A",
                   "storeWhiteList": [],
                   "pushConfigs": [
                     {
@@ -50,5 +50,10 @@ jobs:
       - name: Run Apple Monitor
         run: |
           JAR_FILE=$(ls target/*.jar | head -1)
-          java -jar $JAR_FILE
+          if [ -z "$JAR_FILE" ]; then
+            echo "No JAR file found in target/. Build failed?"
+            exit 1
+          fi
+          echo "Running $JAR_FILE..."
+          java -jar "$JAR_FILE"
         timeout-minutes: 10
