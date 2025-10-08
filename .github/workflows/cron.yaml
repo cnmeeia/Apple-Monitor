@@ -1,0 +1,54 @@
+name: Monitor iPhone 17 Pro Inventory
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 每小时执行一次
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Create config.json
+        run: |
+          cat > config.json << EOF
+          {
+            "appleTaskConfig": {
+              "cronExpressions": "0/1 * * * * ?",
+              "country": "CN",
+              "location": "湖南 长沙",
+              "deviceCodeList": [
+                {
+                  "deviceCode": "MG8T4CH/A",
+                  "storeWhiteList": [],
+                  "pushConfigs": [
+                    {
+                      "barkPushUrl": "https://api.day.app/push",
+                      "barkPushToken": "${{ secrets.BARK_TOKEN }}",
+                      "barkPushSound": "multiwayinvitation.caf",
+                      "feishuBotWebhooks": "",
+                      "feishuBotSecret": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          EOF
+
+      - name: Run Apple Monitor
+        run: |
+          JAR_FILE=$(ls target/*.jar | head -1)
+          java -jar $JAR_FILE
+        timeout-minutes: 10
